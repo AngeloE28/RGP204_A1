@@ -27,7 +27,11 @@ public class Car_Controller : MonoBehaviour
     public LayerMask groundMask;
     public float groundRayLength = 0.5f;
     public Transform groundRayPoint;
-    
+
+    [Header("Wheels")]
+    public float maxWheelTurnAngle; // Max angle, the wheel will turn
+    public Transform frontLeftWheel, frontRightWheel; // Gets the front wheels
+
     // Start is called before the first frame update
     void Start()
     {
@@ -80,7 +84,28 @@ public class Car_Controller : MonoBehaviour
                                       0.0f));
             }
         }
-        
+
+        // Turn both wheels in the direction the car is turning
+        if (speedInput >= 0) // For going forward
+        {
+            frontLeftWheel.localRotation = Quaternion.Euler(frontLeftWheel.localRotation.eulerAngles.x,
+                                                            (turnInput * maxWheelTurnAngle) - 90, // Takeaway 90 degrees to compensate the wheels rotation
+                                                            frontLeftWheel.localRotation.eulerAngles.z);
+
+            frontRightWheel.localRotation = Quaternion.Euler(frontRightWheel.localRotation.eulerAngles.x,
+                                                            turnInput * maxWheelTurnAngle + 90, // Add 90 degrees to compensate the wheels rotation
+                                                            frontRightWheel.localRotation.eulerAngles.z);
+        }
+        else // Reversing
+        {
+            frontLeftWheel.localRotation = Quaternion.Euler(frontLeftWheel.localRotation.eulerAngles.x,
+                                                            -((turnInput * maxWheelTurnAngle) + 90), // Add 90 degrees to compensate the wheels rotation
+                                                            frontLeftWheel.localRotation.eulerAngles.z);
+
+            frontRightWheel.localRotation = Quaternion.Euler(frontRightWheel.localRotation.eulerAngles.x,
+                                                            -(turnInput * maxWheelTurnAngle - 90), // Takeaway 90 degrees to compensate the wheels rotation
+                                                            frontRightWheel.localRotation.eulerAngles.z);
+        }
         // Car follows the carController thats moving
         transform.position = carControllerRb.transform.position;
     }
