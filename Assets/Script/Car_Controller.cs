@@ -23,6 +23,7 @@ public class Car_Controller : MonoBehaviour
     public float speedInput, turnInput;
 
     private bool isGrounded; // Is car grounded?
+
     [Header("Raycast System")]
     public LayerMask groundMask;
     public float groundRayLength = 0.5f;
@@ -31,6 +32,11 @@ public class Car_Controller : MonoBehaviour
     [Header("Wheels")]
     public float maxWheelTurnAngle; // Max angle, the wheel will turn
     public Transform frontLeftWheel, frontRightWheel; // Gets the front wheels
+
+    [Header("Particle System")]
+    public float maxEmission; // Max particle being emitted
+    private float emissionRate; // Controls how many particles to emit
+    public ParticleSystem[] trailEffects; // Gets all the particle systems
 
     // Start is called before the first frame update
     void Start()
@@ -131,6 +137,9 @@ public class Car_Controller : MonoBehaviour
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * smoothVal);
         }
 
+        // Don't emit anything when not moving
+        emissionRate = 0.0f;
+
         // Check to see if car is grounded
         if (isGrounded)
         {
@@ -140,6 +149,8 @@ public class Car_Controller : MonoBehaviour
             if (Mathf.Abs(speedInput) > 0.0f)
             {
                 carControllerRb.AddForce(transform.forward * speedInput);
+
+                emissionRate = maxEmission; // Start playing particles
             }
         }
         else
@@ -149,6 +160,13 @@ public class Car_Controller : MonoBehaviour
 
             // Increases the gravity applied to the car
             carControllerRb.AddForce(Vector3.up * -gravityForce * gravityMultiplier);
+        }
+
+        // Controls the emission of the trailEffects
+        foreach(ParticleSystem trail in trailEffects)
+        {
+            var emissionModule = trail.emission;
+            emissionModule.rateOverTime = emissionRate;
         }
     }
 }
