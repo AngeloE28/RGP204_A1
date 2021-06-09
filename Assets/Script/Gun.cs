@@ -18,7 +18,6 @@ public class Gun : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(car.speedInput != 0 || car.speedInput == 0)
         PlayerInput();
     }
 

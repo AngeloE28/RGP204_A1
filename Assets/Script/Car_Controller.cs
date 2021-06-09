@@ -51,8 +51,7 @@ public class Car_Controller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gun.shooting || !gun.shooting)
-            PlayerInputs();
+        PlayerInputs();
     }
 
     private void PlayerInputs()
