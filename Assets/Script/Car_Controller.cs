@@ -41,6 +41,9 @@ public class Car_Controller : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Hide the cursor during play
+        Cursor.visible = false;
+
         // Unparent the car controller that will be followed
         carControllerRb.transform.parent = null;
     }
