@@ -23,6 +23,7 @@ public class Car_Controller : MonoBehaviour
     public float speedInput, turnInput;
 
     private bool isGrounded; // Is car grounded?
+    private float notGroundedTimer; // Timer to flip the car
 
     [Header("Raycast System")]
     public LayerMask groundMask;
@@ -145,6 +146,9 @@ public class Car_Controller : MonoBehaviour
         // Check to see if car is grounded
         if (isGrounded)
         {
+            // Reset the timer
+            notGroundedTimer = 5f;
+
             carControllerRb.drag = dragOnGround;
 
             // Checks to see if there is input received
@@ -162,6 +166,26 @@ public class Car_Controller : MonoBehaviour
 
             // Increases the gravity applied to the car
             carControllerRb.AddForce(Vector3.up * -gravityForce * gravityMultiplier);
+
+            // Resets the car's z-rotation when the car is not grounded for a set amount of time
+            if (notGroundedTimer > 0.0f)
+            {
+                notGroundedTimer -= Time.deltaTime;
+            }
+            else
+            {
+                // Rotate the car to reset the rotation
+                Quaternion targetRotations;
+                // Get the euler angles
+                Vector3 eulerRotation = transform.rotation.eulerAngles;
+
+                // Get target rotation
+                targetRotations = Quaternion.Euler(eulerRotation.x, eulerRotation.y, 0.0f);
+
+                // Rotate the car
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotations, Time.deltaTime * 3.0f);
+            }
+
         }
 
         // Controls the emission of the trailEffects
