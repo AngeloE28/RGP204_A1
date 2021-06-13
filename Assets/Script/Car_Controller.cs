@@ -10,9 +10,8 @@ public class Car_Controller : MonoBehaviour
     public BoxCollider carCollider;
     public Gun gun;
 
-    public float smoothCarRotationVal = 0.2f; // For smooth rotations, when going up ramps
-    public float carFlipRotationValAuto = 5.0f; // For smooth rotations, when resetting the z & x-axis
-    public float carFlipRotationValMan = 40.0f; // For smooth rotations, when resetting the z & x-axis
+    public float smoothCarRotationVal = 15.0f; // For smooth rotations, when going up ramps
+    public float carFlipRotationVal = 5.0f; // For smooth rotations, when resetting the z & x-axis
 
     [Header("Movement Values")]
     // Accelerations
@@ -131,7 +130,6 @@ public class Car_Controller : MonoBehaviour
     private void FixedUpdate()
     {
         isGrounded = false;
-        isOnRoof = false;
 
         RaycastHit hit;
 
@@ -149,15 +147,6 @@ public class Car_Controller : MonoBehaviour
             // Smooth out rotation
             transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * smoothCarRotationVal);
         }
-
-        // Check if the car is on its roof
-        if (Physics.Raycast(roofRayPoint.position, transform.up, out hit, roofRayLength, groundMask))
-        {
-            isOnRoof = true;
-        }
-        Debug.DrawRay(roofRayPoint.position, transform.up * roofRayLength, Color.red);
-
-
 
         // Don't emit anything when not moving
         emissionRate = 0.0f;
@@ -187,13 +176,13 @@ public class Car_Controller : MonoBehaviour
             carControllerRb.AddForce(Vector3.up * -gravityForce * gravityMultiplier);
 
             // Manual reset
-            if (flipInput != 0 && isOnRoof)
+            if (flipInput != 0)
             {
-                CarFlip(carFlipRotationValMan);
+                CarFlip();
             }
 
             // Automatic reset
-            // Resets the car's z-rotation when the car is not grounded for a set amount of time
+            // Resets the car's x & z-rotation when the car is not grounded for a set amount of time
             if (notGroundedTimer > 0.0f)
             {
                 notGroundedTimer -= Time.deltaTime;
@@ -201,7 +190,7 @@ public class Car_Controller : MonoBehaviour
             else
             {
                 // Flip the car
-                CarFlip(carFlipRotationValAuto);
+                CarFlip();
             }
 
         }
@@ -214,7 +203,7 @@ public class Car_Controller : MonoBehaviour
         }
     }
 
-    private void CarFlip(float smoothVal)
+    private void CarFlip()
     {
         // Rotate the car to reset the rotation
         Quaternion targetRotations;
@@ -225,7 +214,7 @@ public class Car_Controller : MonoBehaviour
         targetRotations = Quaternion.Euler(0.0f, eulerRotation.y, 0.0f);
 
         // Rotate the car
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotations, Time.deltaTime * smoothVal);
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotations, Time.deltaTime * carFlipRotationVal);
     }
 
 }
