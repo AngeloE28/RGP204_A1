@@ -10,7 +10,9 @@ public class Car_Controller : MonoBehaviour
     public BoxCollider carCollider;
     public Gun gun;
 
-    public float smoothVal = 0.2f; // For smooth rotations, when going up ramps
+    public float smoothCarRotationVal = 0.2f; // For smooth rotations, when going up ramps
+    public float carFlipRotationValAuto = 5.0f; // For smooth rotations, when resetting the z & x-axis
+    public float carFlipRotationValMan = 40.0f; // For smooth rotations, when resetting the z & x-axis
 
     [Header("Movement Values")]
     // Accelerations
@@ -20,15 +22,17 @@ public class Car_Controller : MonoBehaviour
     public float turnStrength; // Maximum angle the car can turn
 
     // Inputs
-    public float speedInput, turnInput;
+    public float speedInput, turnInput, flipInput;
 
-    private bool isGrounded; // Is car grounded?
+    private bool isGrounded, isOnRoof; // Is car grounded?
     private float notGroundedTimer; // Timer to flip the car
 
     [Header("Raycast System")]
     public LayerMask groundMask;
     public float groundRayLength = 0.5f;
+    public float roofRayLength = 0.5f;
     public Transform groundRayPoint;
+    public Transform roofRayPoint;
 
     [Header("Wheels")]
     public float maxWheelTurnAngle; // Max angle, the wheel will turn
@@ -115,6 +119,10 @@ public class Car_Controller : MonoBehaviour
                                                             -(turnInput * maxWheelTurnAngle - 90), // Takeaway 90 degrees to compensate the wheels rotation
                                                             frontRightWheel.localRotation.eulerAngles.z);
         }
+
+        // Allow car to flip
+        flipInput = Input.GetAxis("Mouse Y");
+
         // Car follows the carController thats moving
         transform.position = carControllerRb.transform.position;
     }
@@ -123,6 +131,8 @@ public class Car_Controller : MonoBehaviour
     private void FixedUpdate()
     {
         isGrounded = false;
+        isOnRoof = false;
+
         RaycastHit hit;
 
         // Check if the ray is colliding with any object with the Ground layermask
@@ -137,8 +147,17 @@ public class Car_Controller : MonoBehaviour
             targetRotation = Quaternion.FromToRotation(transform.up, hit.normal) * transform.rotation;
 
             // Smooth out rotation
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * smoothVal);
+            transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * smoothCarRotationVal);
         }
+
+        // Check if the car is on its roof
+        if (Physics.Raycast(roofRayPoint.position, transform.up, out hit, roofRayLength, groundMask))
+        {
+            isOnRoof = true;
+        }
+        Debug.DrawRay(roofRayPoint.position, transform.up * roofRayLength, Color.red);
+
+
 
         // Don't emit anything when not moving
         emissionRate = 0.0f;
@@ -167,6 +186,13 @@ public class Car_Controller : MonoBehaviour
             // Increases the gravity applied to the car
             carControllerRb.AddForce(Vector3.up * -gravityForce * gravityMultiplier);
 
+            // Manual reset
+            if (flipInput != 0 && isOnRoof)
+            {
+                CarFlip(carFlipRotationValMan);
+            }
+
+            // Automatic reset
             // Resets the car's z-rotation when the car is not grounded for a set amount of time
             if (notGroundedTimer > 0.0f)
             {
@@ -174,16 +200,8 @@ public class Car_Controller : MonoBehaviour
             }
             else
             {
-                // Rotate the car to reset the rotation
-                Quaternion targetRotations;
-                // Get the euler angles
-                Vector3 eulerRotation = transform.rotation.eulerAngles;
-
-                // Get target rotation
-                targetRotations = Quaternion.Euler(eulerRotation.x, eulerRotation.y, 0.0f);
-
-                // Rotate the car
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotations, Time.deltaTime * 3.0f);
+                // Flip the car
+                CarFlip(carFlipRotationValAuto);
             }
 
         }
@@ -195,4 +213,19 @@ public class Car_Controller : MonoBehaviour
             emissionModule.rateOverTime = emissionRate;
         }
     }
+
+    private void CarFlip(float smoothVal)
+    {
+        // Rotate the car to reset the rotation
+        Quaternion targetRotations;
+        // Get the euler angles
+        Vector3 eulerRotation = transform.rotation.eulerAngles;
+
+        // Get target rotation
+        targetRotations = Quaternion.Euler(0.0f, eulerRotation.y, 0.0f);
+
+        // Rotate the car
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotations, Time.deltaTime * smoothVal);
+    }
+
 }
