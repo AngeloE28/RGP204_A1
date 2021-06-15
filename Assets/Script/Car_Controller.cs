@@ -23,7 +23,7 @@ public class Car_Controller : MonoBehaviour
     // Inputs
     public float speedInput, turnInput, flipInput;
 
-    private bool isGrounded, isOnRoof; // Is car grounded?
+    private bool isGrounded; // Is car grounded?
     private float notGroundedTimer; // Timer to flip the car
 
     [Header("Raycast System")]
@@ -176,7 +176,7 @@ public class Car_Controller : MonoBehaviour
             carControllerRb.AddForce(Vector3.up * -gravityForce * gravityMultiplier);
 
             // Manual reset
-            if (flipInput != 0)
+            if (flipInput > 0)
             {
                 CarFlip();
             }

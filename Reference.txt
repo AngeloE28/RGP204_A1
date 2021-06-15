@@ -1,0 +1,12 @@
+The portal mechanic was achieved by following the tutorial
+"Smooth PORTALS in Unity"
+Brackeys
+08/01/2018, at https://youtu.be/cuQao3hEKfs
+
+The assets created include
+CameraMat_Table material
+CameraMat_Temple material
+ScreenCutoutShader shader script
+PortalCam script
+PortalTextureSetup script
+PortalTeleport script
