@@ -10,9 +10,9 @@ public class Gun : MonoBehaviour
     public float maxEmmision; // Max particles being emitted
     private float emissionRate; // Controls how many particles to emit
     // Gun statistics
-    public float gunRange = 1000.0f; // Maximum range of the hitscan
+    public float gunRange = 100.0f; // Maximum range of the hitscan
     public bool allowGunToSpray;
-
+    public float damage = 20;
     public bool shooting; // How does player shoot?
 
     // Update is called once per frame
@@ -49,6 +49,20 @@ public class Gun : MonoBehaviour
         if (Physics.Raycast(attackPoint.position, transform.forward, out hitInfo, gunRange))
         {
             print(hitInfo.transform.name);
+
+           EnemyBehaviour enemy = hitInfo.transform.GetComponent<EnemyBehaviour>();
+           TargetObject target = hitInfo.transform.GetComponent<TargetObject>();
+
+            if (enemy != null)
+            {
+                enemy.TakeDamage(damage);
+
+            }
+
+            if(target != null)
+            {
+                target.TakeDamage(damage);
+            }
         }
         
     }
